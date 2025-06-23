@@ -7,6 +7,7 @@ const User = require('../models/User');
 const Crypt = require('../../../../helpers/utils/crypt');
 
 const { CODE } = require('../../../../helpers/lib/httpCode');
+const url = new Map();
 
 /**
  * @class
@@ -117,6 +118,72 @@ class UserCommand {
 
     return response.data(res, 'User deleted successfully!', user);
 
+  }
+
+  static async shortener(req, res) {
+    const cx = 'users-createUsers';
+
+    const payload = {
+      ...req.query
+    };
+
+    let linkUniq = uuid();
+
+    url.set(linkUniq, {
+      original: payload.realUrl,
+      total: 0
+    });
+
+    console.log(`http://localhost:8080/${linkUniq}`);
+
+    return response.data(res, 'User created successfully!', {
+      uniq: linkUniq
+    });
+  }
+
+  static async getShortener(req, res) {
+    const cx = 'users-createUsers';
+
+    const payload = {
+      ...req.params
+    };
+    // console.log(payload);
+
+    // console.log(`http://localhost:8080/${linkUniq}`);
+    const original = url.get(payload.linkUniq);
+    let total = original.total + 1;
+    url.set(payload.linkUniq, {
+      total: total,
+      original: original.original
+    })
+    res.redirect(`https://${original.original}`);
+
+    // return response.data(res, 'User created successfully!', {
+    //   original: original
+    // });
+  }
+
+  static async checkShortener(req, res) {
+    const cx = 'users-createUsers';
+
+    const payload = {
+      ...req.params
+    };
+    // console.log(payload);
+
+    // console.log(`http://localhost:8080/${linkUniq}`);
+    // const original = url.get(payload.linkUniq);
+    // let total = original.total + 1;
+    // url.set(payload.linkUniq, {
+    //   total: total,
+    //   original: payload.original
+    // })
+    // res.redirect(`https://${original.original}`);
+    const original = url.get(payload.linkUniq);
+
+    return response.data(res, 'User created successfully!', {
+      original: original
+    });
   }
 }
 
